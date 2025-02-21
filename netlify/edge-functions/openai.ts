@@ -8,7 +8,7 @@ export default async (request: Request, context: Context) => {
     }
 
     const body = await request.json();
-    
+
     // Create thread and message
     const threadResponse = await fetch('https://api.openai.com/v1/threads', {
       method: 'POST',
@@ -18,11 +18,15 @@ export default async (request: Request, context: Context) => {
         'OpenAI-Beta': 'assistants=v1'
       }
     });
-    
+
+    if (!threadResponse.ok) {
+      throw new Error(`Failed to create thread: ${await threadResponse.text()}`);
+    }
+
     const thread = await threadResponse.json();
-    
+
     // Create message in thread
-    await fetch(`https://api.openai.com/v1/threads/${thread.id}/messages`, {
+    const messageResponse = await fetch(`https://api.openai.com/v1/threads/${thread.id}/messages`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${Netlify.env.get('OPENAI_API_KEY')}`,
@@ -34,6 +38,10 @@ export default async (request: Request, context: Context) => {
         content: body.prompt
       })
     });
+
+    if (!messageResponse.ok) {
+      throw new Error(`Failed to create message: ${await messageResponse.text()}`);
+    }
 
     // Create run
     const runResponse = await fetch(`https://api.openai.com/v1/threads/${thread.id}/runs`, {
@@ -48,6 +56,10 @@ export default async (request: Request, context: Context) => {
       })
     });
 
+    if (!runResponse.ok) {
+      throw new Error(`Failed to create run: ${await runResponse.text()}`);
+    }
+
     const run = await runResponse.json();
 
     // Poll for completion
@@ -60,6 +72,11 @@ export default async (request: Request, context: Context) => {
           'OpenAI-Beta': 'assistants=v1'
         }
       });
+
+      if (!statusResponse.ok) {
+        throw new Error(`Failed to get run status: ${await statusResponse.text()}`);
+      }
+
       runStatus = await statusResponse.json();
     } while (runStatus.status === "in_progress" || runStatus.status === "queued");
 
@@ -70,15 +87,31 @@ export default async (request: Request, context: Context) => {
           'OpenAI-Beta': 'assistants=v1'
         }
       });
+
+      if (!messagesResponse.ok) {
+        throw new Error(`Failed to get messages: ${await messagesResponse.text()}`);
+      }
+
       const messages = await messagesResponse.json();
-      
-      return new Response(JSON.stringify(messages.data[0].content[0].text.value), {
-        headers: { 'Content-Type': 'application/json' }
-      });
+      const lastMessage = messages.data[0];
+
+      if (!lastMessage || !lastMessage.content || !lastMessage.content[0] || !lastMessage.content[0].text) {
+        throw new Error('Invalid message format received from OpenAI');
+      }
+
+      try {
+        const jsonResponse = JSON.parse(lastMessage.content[0].text.value);
+        return new Response(JSON.stringify(jsonResponse), {
+          headers: { 'Content-Type': 'application/json' }
+        });
+      } catch (parseError) {
+        throw new Error(`Failed to parse OpenAI response as JSON: ${parseError.message}`);
+      }
     } else {
       throw new Error(`Run failed with status: ${runStatus.status}`);
     }
   } catch (error) {
+    console.error('Edge function error:', error);
     return new Response(JSON.stringify({ error: error.message }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' }
