@@ -15,7 +15,7 @@ export default async (request: Request, context: Context) => {
       headers: {
         'Authorization': `Bearer ${Netlify.env.get('OPENAI_API_KEY')}`,
         'Content-Type': 'application/json',
-        'OpenAI-Beta': 'assistants=v1'
+        'OpenAI-Beta': 'assistants=v2'
       }
     });
 
@@ -31,7 +31,7 @@ export default async (request: Request, context: Context) => {
       headers: {
         'Authorization': `Bearer ${Netlify.env.get('OPENAI_API_KEY')}`,
         'Content-Type': 'application/json',
-        'OpenAI-Beta': 'assistants=v1'
+        'OpenAI-Beta': 'assistants=v2'
       },
       body: JSON.stringify({
         role: "user",
@@ -49,7 +49,7 @@ export default async (request: Request, context: Context) => {
       headers: {
         'Authorization': `Bearer ${Netlify.env.get('OPENAI_API_KEY')}`,
         'Content-Type': 'application/json',
-        'OpenAI-Beta': 'assistants=v1'
+        'OpenAI-Beta': 'assistants=v2'
       },
       body: JSON.stringify({
         assistant_id: "asst_mwBvVrwED3NhTkh8NqZDFXBH"
@@ -69,7 +69,7 @@ export default async (request: Request, context: Context) => {
       const statusResponse = await fetch(`https://api.openai.com/v1/threads/${thread.id}/runs/${run.id}`, {
         headers: {
           'Authorization': `Bearer ${Netlify.env.get('OPENAI_API_KEY')}`,
-          'OpenAI-Beta': 'assistants=v1'
+          'OpenAI-Beta': 'assistants=v2'
         }
       });
 
@@ -84,7 +84,7 @@ export default async (request: Request, context: Context) => {
       const messagesResponse = await fetch(`https://api.openai.com/v1/threads/${thread.id}/messages`, {
         headers: {
           'Authorization': `Bearer ${Netlify.env.get('OPENAI_API_KEY')}`,
-          'OpenAI-Beta': 'assistants=v1'
+          'OpenAI-Beta': 'assistants=v2'
         }
       });
 
