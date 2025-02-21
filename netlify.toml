@@ -3,5 +3,9 @@
   publish = "dist"
 
 [[edge_functions]]
-  path = "/api/openai"
-  function = "openai"
+  path = "/api/openai/create"
+  function = "openai-create"
+
+[[edge_functions]]
+  path = "/api/openai/status"
+  function = "openai-status"

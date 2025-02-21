@@ -286,8 +286,8 @@ function App() {
     setError(null);
 
     try {
-      // Use relative path instead of absolute URL
-      const response = await fetch('/api/openai', {
+      // First, create the thread and run
+      const createResponse = await fetch('/api/openai/create', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -297,13 +297,35 @@ function App() {
         }),
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to generate learning plan');
+      if (!createResponse.ok) {
+        const errorData = await createResponse.json();
+        throw new Error(errorData.error || 'Failed to start learning plan generation');
       }
 
-      const jsonResponse = await response.json();
-      setResponse(jsonResponse as AIResponse);
+      const { threadId, runId } = await createResponse.json();
+
+      // Poll for completion
+      let completed = false;
+      while (!completed) {
+        const statusResponse = await fetch(`/api/openai/status?threadId=${threadId}&runId=${runId}`);
+
+        if (!statusResponse.ok) {
+          const errorData = await statusResponse.json();
+          throw new Error(errorData.error || 'Failed to check learning plan status');
+        }
+
+        const statusData = await statusResponse.json();
+
+        if (statusData.completed) {
+          setResponse(statusData.data as AIResponse);
+          completed = true;
+        } else if (statusData.status === 'failed' || statusData.status === 'cancelled' || statusData.status === 'expired') {
+          throw new Error(`Generation failed with status: ${statusData.status}`);
+        } else {
+          // Wait before polling again
+          await new Promise(resolve => setTimeout(resolve, 1000));
+        }
+      }
     } catch (err) {
       console.error('Error:', err);
       setError(err instanceof Error ? err.message : 'An error occurred');
