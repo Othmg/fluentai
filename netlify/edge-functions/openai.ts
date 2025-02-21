@@ -8,15 +8,16 @@ export default async (request: Request, context: Context) => {
     }
 
     const body = await request.json();
+    const headers = {
+      'Authorization': `Bearer ${Netlify.env.get('OPENAI_API_KEY')}`,
+      'Content-Type': 'application/json',
+      'OpenAI-Beta': 'assistants=v2'
+    };
 
-    // Create thread and message
+    // Create thread
     const threadResponse = await fetch('https://api.openai.com/v1/threads', {
       method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${Netlify.env.get('OPENAI_API_KEY')}`,
-        'Content-Type': 'application/json',
-        'OpenAI-Beta': 'assistants=v2'
-      }
+      headers
     });
 
     if (!threadResponse.ok) {
@@ -28,11 +29,7 @@ export default async (request: Request, context: Context) => {
     // Create message in thread
     const messageResponse = await fetch(`https://api.openai.com/v1/threads/${thread.id}/messages`, {
       method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${Netlify.env.get('OPENAI_API_KEY')}`,
-        'Content-Type': 'application/json',
-        'OpenAI-Beta': 'assistants=v2'
-      },
+      headers,
       body: JSON.stringify({
         role: "user",
         content: body.prompt
@@ -46,11 +43,7 @@ export default async (request: Request, context: Context) => {
     // Create run
     const runResponse = await fetch(`https://api.openai.com/v1/threads/${thread.id}/runs`, {
       method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${Netlify.env.get('OPENAI_API_KEY')}`,
-        'Content-Type': 'application/json',
-        'OpenAI-Beta': 'assistants=v2'
-      },
+      headers,
       body: JSON.stringify({
         assistant_id: "asst_mwBvVrwED3NhTkh8NqZDFXBH"
       })
@@ -62,30 +55,46 @@ export default async (request: Request, context: Context) => {
 
     const run = await runResponse.json();
 
-    // Poll for completion
+    // Poll for completion with timeout
     let runStatus;
-    do {
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      const statusResponse = await fetch(`https://api.openai.com/v1/threads/${thread.id}/runs/${run.id}`, {
-        headers: {
-          'Authorization': `Bearer ${Netlify.env.get('OPENAI_API_KEY')}`,
-          'OpenAI-Beta': 'assistants=v2'
+    let attempts = 0;
+    const maxAttempts = 30; // Maximum 30 seconds
+
+    while (attempts < maxAttempts) {
+      try {
+        const statusResponse = await fetch(`https://api.openai.com/v1/threads/${thread.id}/runs/${run.id}`, {
+          headers
+        });
+
+        if (!statusResponse.ok) {
+          throw new Error(`Failed to get run status: ${await statusResponse.text()}`);
         }
-      });
 
-      if (!statusResponse.ok) {
-        throw new Error(`Failed to get run status: ${await statusResponse.text()}`);
+        runStatus = await statusResponse.json();
+
+        if (runStatus.status === "completed") {
+          break;
+        } else if (runStatus.status === "failed" || runStatus.status === "cancelled" || runStatus.status === "expired") {
+          throw new Error(`Run failed with status: ${runStatus.status}`);
+        }
+
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        attempts++;
+      } catch (error) {
+        if (error.name === 'AbortError') {
+          continue; // Try again if it was an abort error
+        }
+        throw error; // Re-throw other errors
       }
+    }
 
-      runStatus = await statusResponse.json();
-    } while (runStatus.status === "in_progress" || runStatus.status === "queued");
+    if (attempts >= maxAttempts) {
+      throw new Error('Request timed out after 30 seconds');
+    }
 
     if (runStatus.status === "completed") {
       const messagesResponse = await fetch(`https://api.openai.com/v1/threads/${thread.id}/messages`, {
-        headers: {
-          'Authorization': `Bearer ${Netlify.env.get('OPENAI_API_KEY')}`,
-          'OpenAI-Beta': 'assistants=v2'
-        }
+        headers
       });
 
       if (!messagesResponse.ok) {
@@ -95,7 +104,7 @@ export default async (request: Request, context: Context) => {
       const messages = await messagesResponse.json();
       const lastMessage = messages.data[0];
 
-      if (!lastMessage || !lastMessage.content || !lastMessage.content[0] || !lastMessage.content[0].text) {
+      if (!lastMessage?.content?.[0]?.text?.value) {
         throw new Error('Invalid message format received from OpenAI');
       }
 
@@ -112,7 +121,10 @@ export default async (request: Request, context: Context) => {
     }
   } catch (error) {
     console.error('Edge function error:', error);
-    return new Response(JSON.stringify({ error: error.message }), {
+    return new Response(JSON.stringify({
+      error: `OpenAI API Error: ${error.message}`,
+      details: error.stack
+    }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' }
     });

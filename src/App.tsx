@@ -286,6 +286,7 @@ function App() {
     setError(null);
 
     try {
+      // Use relative path instead of absolute URL
       const response = await fetch('/api/openai', {
         method: 'POST',
         headers: {
@@ -297,7 +298,8 @@ function App() {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to generate learning plan');
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to generate learning plan');
       }
 
       const jsonResponse = await response.json();
