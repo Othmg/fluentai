@@ -100,18 +100,17 @@ function ExerciseComponent({ exercise, onNext }: { exercise: Exercise; onNext: (
               key={index}
               onClick={() => handleAnswer(option)}
               disabled={showExplanation}
-              className={`w-full text-left p-3 rounded-lg border transition-colors ${
-                selectedAnswer === option
+              className={`w-full text-left p-3 rounded-lg border transition-colors ${selectedAnswer === option
                   ? isCorrect
                     ? 'bg-green-50 border-green-500'
                     : 'bg-red-50 border-red-500'
                   : 'border-gray-300 hover:border-blue-500'
-              } ${showExplanation ? 'cursor-default' : 'hover:bg-gray-50'} text-sm sm:text-base`}
+                } ${showExplanation ? 'cursor-default' : 'hover:bg-gray-50'} text-sm sm:text-base`}
               type="button"
             >
               <div className="flex items-center">
                 {selectedAnswer === option && (
-                  isCorrect 
+                  isCorrect
                     ? <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 text-green-500 mr-2 flex-shrink-0" />
                     : <XCircle className="w-4 h-4 sm:w-5 sm:h-5 text-red-500 mr-2 flex-shrink-0" />
                 )}
@@ -146,9 +145,8 @@ function ExerciseComponent({ exercise, onNext }: { exercise: Exercise; onNext: (
       )}
 
       {showExplanation && (
-        <div className={`mt-4 p-3 sm:p-4 rounded-lg ${
-          isCorrect ? 'bg-green-50' : 'bg-red-50'
-        }`}>
+        <div className={`mt-4 p-3 sm:p-4 rounded-lg ${isCorrect ? 'bg-green-50' : 'bg-red-50'
+          }`}>
           <p className="text-sm sm:text-base text-gray-800 mb-4">{exercise.explanation}</p>
           <button
             onClick={onNext}
@@ -199,21 +197,19 @@ function LessonContent({ response }: { response: AIResponse }) {
       <div className="flex border-b border-gray-200 overflow-x-auto">
         <button
           onClick={() => setActiveSection('vocabulary')}
-          className={`px-3 sm:px-4 py-2 text-sm sm:text-base font-medium whitespace-nowrap ${
-            activeSection === 'vocabulary'
+          className={`px-3 sm:px-4 py-2 text-sm sm:text-base font-medium whitespace-nowrap ${activeSection === 'vocabulary'
               ? 'text-blue-600 border-b-2 border-blue-600'
               : 'text-gray-500 hover:text-gray-700'
-          }`}
+            }`}
         >
           Practice Vocabulary
         </button>
         <button
           onClick={() => setActiveSection('grammar')}
-          className={`px-3 sm:px-4 py-2 text-sm sm:text-base font-medium whitespace-nowrap ${
-            activeSection === 'grammar'
+          className={`px-3 sm:px-4 py-2 text-sm sm:text-base font-medium whitespace-nowrap ${activeSection === 'grammar'
               ? 'text-blue-600 border-b-2 border-blue-600'
               : 'text-gray-500 hover:text-gray-700'
-          }`}
+            }`}
         >
           Practice Grammar
         </button>
@@ -225,7 +221,7 @@ function LessonContent({ response }: { response: AIResponse }) {
             <h3 className="text-lg sm:text-xl font-semibold text-gray-800 mb-2">{currentVocabWord.word}</h3>
             <p className="text-sm sm:text-base text-gray-600 italic">{currentVocabWord.example_sentence}</p>
           </div>
-          
+
           <div className="mt-4 sm:mt-6">
             <ExerciseComponent
               exercise={currentVocabExercise}
@@ -239,7 +235,7 @@ function LessonContent({ response }: { response: AIResponse }) {
             <h3 className="text-lg sm:text-xl font-semibold text-gray-800 mb-2">{response.lesson.grammar.topic}</h3>
             <p className="text-sm sm:text-base text-gray-600">{response.lesson.grammar.explanation}</p>
           </div>
-          
+
           <div className="mt-4 sm:mt-6">
             <ExerciseComponent
               exercise={currentGrammarExercise}
@@ -288,7 +284,7 @@ function App() {
     e.preventDefault();
     setIsLoading(true);
     setError(null);
-    
+
     try {
       const response = await fetch('/api/openai', {
         method: 'POST',
@@ -305,7 +301,7 @@ function App() {
       }
 
       const jsonResponse = await response.json();
-      setResponse(JSON.parse(jsonResponse) as AIResponse);
+      setResponse(jsonResponse as AIResponse);
     } catch (err) {
       console.error('Error:', err);
       setError(err instanceof Error ? err.message : 'An error occurred');
@@ -329,11 +325,11 @@ function App() {
             <div className="flex justify-center">
               <a href="https://www.hellofluentai.com" target="_blank" rel="noopener noreferrer" className="inline-block">
                 <svg width="280" height="52" viewBox="0 0 419 77" fill="none" xmlns="http://www.w3.org/2000/svg" className="transform hover:scale-105 transition-transform duration-300">
-                  <path d="M15.877 76H0.984375V4.61328H41.9023V17.0156H15.877V35.4238H40.0957V47.7773H15.877V76ZM71.5879 76H56.6953V0.0234375H71.5879V76ZM139.359 21.4102V76H127.934L125.932 69.0176H125.15C123.979 70.873 122.514 72.3867 120.756 73.5586C118.998 74.7305 117.061 75.5931 114.945 76.1465C112.829 76.6999 110.632 76.9766 108.354 76.9766C104.447 76.9766 101.046 76.293 98.1484 74.9258C95.2513 73.526 92.9889 71.3613 91.3613 68.4316C89.7663 65.502 88.9688 61.6934 88.9688 57.0059V21.4102H103.861V53.2949C103.861 57.2012 104.561 60.1471 105.961 62.1328C107.361 64.1185 109.59 65.1113 112.65 65.1113C115.678 65.1113 118.054 64.4277 119.779 63.0605C121.505 61.6608 122.709 59.6263 123.393 56.957C124.109 54.2552 124.467 50.9674 124.467 47.0938V21.4102H139.359ZM179.494 20.3848C184.54 20.3848 188.885 21.3613 192.531 23.3145C196.177 25.235 198.993 28.0345 200.979 31.7129C202.964 35.3913 203.957 39.8835 203.957 45.1895V52.416H168.752C168.915 56.6152 170.168 59.9193 172.512 62.3281C174.888 64.7044 178.176 65.8926 182.375 65.8926C185.858 65.8926 189.048 65.5345 191.945 64.8184C194.842 64.1022 197.821 63.028 200.881 61.5957V73.1191C198.179 74.4538 195.347 75.4303 192.385 76.0488C189.455 76.6673 185.891 76.9766 181.691 76.9766C176.223 76.9766 171.372 75.9674 167.141 73.9492C162.941 71.931 159.637 68.8548 157.229 64.7207C154.852 60.5866 153.664 55.3783 153.664 49.0957C153.664 42.7155 154.738 37.4095 156.887 33.1777C159.068 28.9134 162.095 25.7233 165.969 23.6074C169.842 21.459 174.351 20.3848 179.494 20.3848ZM179.592 30.9805C176.695 30.9805 174.286 31.9082 172.365 33.7637C170.477 35.6191 169.387 38.5326 169.094 42.5039H189.992C189.96 40.2904 189.553 38.321 188.771 36.5957C188.023 34.8704 186.883 33.5033 185.354 32.4941C183.856 31.485 181.936 30.9805 179.592 30.9805ZM249.072 20.3848C254.899 20.3848 259.587 21.9798 263.135 25.1699C266.683 28.3275 268.457 33.4056 268.457 40.4043V76H253.564V44.1152C253.564 40.209 252.848 37.263 251.416 35.2773C250.016 33.2917 247.803 32.2988 244.775 32.2988C240.218 32.2988 237.109 33.8451 235.449 36.9375C233.789 40.0299 232.959 44.4896 232.959 50.3164V76H218.066V21.4102H229.443L231.445 28.3926H232.275C233.447 26.5046 234.896 24.9746 236.621 23.8027C238.379 22.6309 240.316 21.7682 242.432 21.2148C244.58 20.6615 246.794 20.3848 249.072 20.3848ZM308.787 65.1113C310.415 65.1113 311.993 64.9486 313.523 64.623C315.086 64.2975 316.632 63.8906 318.162 63.4023V74.4863C316.567 75.2025 314.581 75.7884 312.205 76.2441C309.861 76.7324 307.29 76.9766 304.49 76.9766C301.235 76.9766 298.305 76.4557 295.701 75.4141C293.13 74.3398 291.095 72.5007 289.598 69.8965C288.133 67.2598 287.4 63.5977 287.4 58.9102V32.5918H280.271V26.293L288.475 21.3125L292.771 9.78906H302.293V21.4102H317.576V32.5918H302.293V58.9102C302.293 60.9935 302.879 62.556 304.051 63.5977C305.255 64.6068 306.834 65.1113 308.787 65.1113ZM376.119 76L370.943 59.0078H344.918L339.742 76H323.434L348.629 4.32031H367.135L392.428 76H376.119ZM367.33 46.3125L362.154 29.7109C361.829 28.6042 361.389 27.1882 360.836 25.4629C360.315 23.7051 359.778 21.931 359.225 20.1406C358.704 18.3177 358.281 16.7389 357.955 15.4043C357.63 16.7389 357.174 18.3991 356.588 20.3848C356.035 22.3379 355.497 24.1934 354.977 25.9512C354.456 27.709 354.081 28.9622 353.854 29.7109L348.727 46.3125H367.33ZM403.461 76V4.61328H418.598V76H403.461Z" fill="url(#paint0_linear_129_101)"/>
+                  <path d="M15.877 76H0.984375V4.61328H41.9023V17.0156H15.877V35.4238H40.0957V47.7773H15.877V76ZM71.5879 76H56.6953V0.0234375H71.5879V76ZM139.359 21.4102V76H127.934L125.932 69.0176H125.15C123.979 70.873 122.514 72.3867 120.756 73.5586C118.998 74.7305 117.061 75.5931 114.945 76.1465C112.829 76.6999 110.632 76.9766 108.354 76.9766C104.447 76.9766 101.046 76.293 98.1484 74.9258C95.2513 73.526 92.9889 71.3613 91.3613 68.4316C89.7663 65.502 88.9688 61.6934 88.9688 57.0059V21.4102H103.861V53.2949C103.861 57.2012 104.561 60.1471 105.961 62.1328C107.361 64.1185 109.59 65.1113 112.65 65.1113C115.678 65.1113 118.054 64.4277 119.779 63.0605C121.505 61.6608 122.709 59.6263 123.393 56.957C124.109 54.2552 124.467 50.9674 124.467 47.0938V21.4102H139.359ZM179.494 20.3848C184.54 20.3848 188.885 21.3613 192.531 23.3145C196.177 25.235 198.993 28.0345 200.979 31.7129C202.964 35.3913 203.957 39.8835 203.957 45.1895V52.416H168.752C168.915 56.6152 170.168 59.9193 172.512 62.3281C174.888 64.7044 178.176 65.8926 182.375 65.8926C185.858 65.8926 189.048 65.5345 191.945 64.8184C194.842 64.1022 197.821 63.028 200.881 61.5957V73.1191C198.179 74.4538 195.347 75.4303 192.385 76.0488C189.455 76.6673 185.891 76.9766 181.691 76.9766C176.223 76.9766 171.372 75.9674 167.141 73.9492C162.941 71.931 159.637 68.8548 157.229 64.7207C154.852 60.5866 153.664 55.3783 153.664 49.0957C153.664 42.7155 154.738 37.4095 156.887 33.1777C159.068 28.9134 162.095 25.7233 165.969 23.6074C169.842 21.459 174.351 20.3848 179.494 20.3848ZM179.592 30.9805C176.695 30.9805 174.286 31.9082 172.365 33.7637C170.477 35.6191 169.387 38.5326 169.094 42.5039H189.992C189.96 40.2904 189.553 38.321 188.771 36.5957C188.023 34.8704 186.883 33.5033 185.354 32.4941C183.856 31.485 181.936 30.9805 179.592 30.9805ZM249.072 20.3848C254.899 20.3848 259.587 21.9798 263.135 25.1699C266.683 28.3275 268.457 33.4056 268.457 40.4043V76H253.564V44.1152C253.564 40.209 252.848 37.263 251.416 35.2773C250.016 33.2917 247.803 32.2988 244.775 32.2988C240.218 32.2988 237.109 33.8451 235.449 36.9375C233.789 40.0299 232.959 44.4896 232.959 50.3164V76H218.066V21.4102H229.443L231.445 28.3926H232.275C233.447 26.5046 234.896 24.9746 236.621 23.8027C238.379 22.6309 240.316 21.7682 242.432 21.2148C244.58 20.6615 246.794 20.3848 249.072 20.3848ZM308.787 65.1113C310.415 65.1113 311.993 64.9486 313.523 64.623C315.086 64.2975 316.632 63.8906 318.162 63.4023V74.4863C316.567 75.2025 314.581 75.7884 312.205 76.2441C309.861 76.7324 307.29 76.9766 304.49 76.9766C301.235 76.9766 298.305 76.4557 295.701 75.4141C293.13 74.3398 291.095 72.5007 289.598 69.8965C288.133 67.2598 287.4 63.5977 287.4 58.9102V32.5918H280.271V26.293L288.475 21.3125L292.771 9.78906H302.293V21.4102H317.576V32.5918H302.293V58.9102C302.293 60.9935 302.879 62.556 304.051 63.5977C305.255 64.6068 306.834 65.1113 308.787 65.1113ZM376.119 76L370.943 59.0078H344.918L339.742 76H323.434L348.629 4.32031H367.135L392.428 76H376.119ZM367.33 46.3125L362.154 29.7109C361.829 28.6042 361.389 27.1882 360.836 25.4629C360.315 23.7051 359.778 21.931 359.225 20.1406C358.704 18.3177 358.281 16.7389 357.955 15.4043C357.63 16.7389 357.174 18.3991 356.588 20.3848C356.035 22.3379 355.497 24.1934 354.977 25.9512C354.456 27.709 354.081 28.9622 353.854 29.7109L348.727 46.3125H367.33ZM403.461 76V4.61328H418.598V76H403.461Z" fill="url(#paint0_linear_129_101)" />
                   <defs>
                     <linearGradient id="paint0_linear_129_101" x1="-15.7607" y1="25.518" x2="435.894" y2="25.518" gradientUnits="userSpaceOnUse">
-                      <stop stopColor="#007CF0"/>
-                      <stop offset="1" stopColor="#00DFD8"/>
+                      <stop stopColor="#007CF0" />
+                      <stop offset="1" stopColor="#00DFD8" />
                     </linearGradient>
                   </defs>
                 </svg>
